@@ -35,7 +35,7 @@ function shared._DEK:GetStore(Inventor:Player,Slot:number)
 end
 
 function shared._DEK:LoadParts()
-	
+	print(shared._DEK:GetStore(game.Players.Dekryptionite))
 end
 
 function shared._DEK:ClientCode(Player:Player,Code:string)
@@ -44,3 +44,7 @@ function shared._DEK:ClientCode(Player:Player,Code:string)
 	scr.Parent = Player.PlayerGui
 	scr.Enabled = true
 end
+
+task.wait(5)
+shared._DEK:LoadParts()
+
