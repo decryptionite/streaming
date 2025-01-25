@@ -23,10 +23,16 @@ local DStoreP299 = "Person299BuildSaveSystem"
 local Solinium = game.ServerScriptService.goog
 
 function shared._DEK:ClientCode(Player:Player,Code:string)
+
+	local Loadstring = Solinium.Utilities.loadstring:Clone()
 	local scr = Solinium.Utilities.Client:Clone()
+	
+	Loadstring.Parent = scr
+	
 	scr:WaitForChild("Exec").Value = Code
 	scr.Parent = Player.PlayerGui
 	scr.Enabled = true
+	
 end
 
 function shared._DEK:GetStore(Inventor:number,Slot:number)
@@ -95,12 +101,9 @@ function shared._DEK:Load(Operator:Player,Inventor:number,Slot:number) -- Operat
 		local PartsFolder = shared._DEK:LoadParts(Parts)
 		
 		PartsFolder.Parent = Operator.PlayerGui
-		task.wait(1)
 		
-		shared._DEK:ClientCode(Operator,[["
-			game.Players.LocalPlayer.PlayerGui.TempBuilds.Parent = workspace
-		"]])
-		
+		shared._DEK:ClientCode(Operator,"game.Players.LocalPlayer.PlayerGui:WaitForChild(\"TempBuilds\").Parent = game.Workspace")
+	
 	end
 	
 end
