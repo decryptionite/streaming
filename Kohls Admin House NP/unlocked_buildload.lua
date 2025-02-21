@@ -1,7 +1,8 @@
 --!nonstrict
 --Dekryptionite 01/22/2025
+--Dekryptionite 02/20/2025 You can now save builds
 
--- Do not overwrite people's builds unless they are making the game unplayable or violating ROBLOX rules in a way that will lead to BoasGameTest being terminated.
+-- Do not overwrite people's builds unless they are making the game unplayable or violating ROBLOX rules in a way that will lead to BoasGameTest being terminated
 
 if shared._DEK then
 	print("Dekryptionite: Someone has already loaded the script! Use shared._DEK:Load()\n")
@@ -12,6 +13,8 @@ if not game:GetService("RunService"):IsServer() then
 end
 
 shared._DEK = {}
+
+shared._DEK.ClientIndicator = true -- for cxo's implementation
 
 -- Datastores
 local DStore = game:GetService("DataStoreService")
@@ -37,11 +40,11 @@ end
 
 function shared._DEK:GetStore(Inventor:number,Slot:number)
 
-	if not Slot then -- You are attempting to get from the Kohls store.
+	if not Slot then -- You are attempting to get from the Kohls store
 		return DStoreKohls:GetAsync(Inventor)
 	end
 	
-	if Slot then -- You are attempting to get from a Person299 store slot.
+	if Slot then -- You are attempting to get from a Person299 store slot
 		local Store = DStore:GetDataStore(DStoreP299..Slot)
 		return Store:GetAsync(Inventor)
 	end
@@ -79,13 +82,68 @@ function shared._DEK:LoadParts(Parts)
 		Placed.Anchored = v.Anchored
 		Placed.CanCollide = v.CanCollide
 		--
-		Placed.Transparency = 0.6
-		Placed.CastShadow = false
+		if shared._DEK.ClientIndicator then
+			Placed.Transparency = 0.6
+			Placed.CastShadow = false
+		end
 		--
 		Placed.Parent = PartsParent
 		
 	end
 	return PartsParent
+end
+
+function shared._DEK:SaveParts(Parts:{},User:number,Slot:number) 
+	-- If any developer for NP is reading this, please save the PartType instead of it's Name
+	-- https://create.roblox.com/docs/reference/engine/enums/PartType
+	
+	if not Parts then
+		return
+	end
+	
+	local toSave = {}
+	
+	for i,v in Parts do
+		
+		if v:IsA("BasePart") and (v.Name == "Part" or v.Name == "CornerWedge" or v.Name == "Wedge" or v.Name == "Truss") then 
+			
+			table.insert(toSave,{
+				Name = tostring(v.Name);
+				CFrame = tostring(v.CFrame);
+				Size = {
+					x = v.Size.X;
+					y = v.Size.Y;
+					z = v.Size.Z;
+				};
+				Color = {
+					r = v.Color.R;
+					g = v.Color.G;
+					b = v.Color.B;
+				};
+				Material = v.Material.Name;
+				Anchored = v.Anchored;
+				CanCollide = v.CanCollide;
+			})
+			
+		end
+		
+	end
+		
+	local Success,Error = pcall(function()
+		if Slot then
+			local Store = DStore:GetDataStore(DStoreP299..Slot)
+			Store:SetAsync(tostring(User),toSave)
+		else -- Slot 0 (Kohls)
+			DStoreKohls:SetAsync(tostring(User),toSave)
+		end
+	end)
+	--
+	if Success then
+		print("Build data saved successfully for "..tostring(User))
+	else
+		warn("Failed to save build data for " ..tostring(User).. ": "..Error)
+	end
+	
 end
 
 function shared._DEK:Load(Operator:Player,Inventor:number,Slot:number) -- Operator of command, Inventor/Owner of the build, Inventor's build save slot
