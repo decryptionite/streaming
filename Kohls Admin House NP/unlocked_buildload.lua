@@ -3,6 +3,9 @@
 --Dekryptionite 02/20/2025 You can now save builds
 --Dekryptionite 02/21/2025 cleaned some shit up; didnt test in game prob doesnt even work lol
 
+-- To-do: Incase of larger builds add a dynamic wait() and have it be cancellable
+-- will clean up shit l8r, works pretty good 4 now
+
 -- Do not overwrite people's builds unless they are making the game unplayable or violating ROBLOX rules in a way that will lead to BoasGameTest being terminated
 
 if shared._DEK then
@@ -165,7 +168,6 @@ function shared._DEK:Load(Operator:Player,Inventor:number,Slot:number) -- Operat
 	local RemoteParts = shared._DEK:GetStore(Inventor,Slot)
 	
 	if RemoteParts then
-	
 		-- Place the parts on the server
 		if Operator == game.Workspace then
 			local Parts = shared._DEK:LoadParts(RemoteParts,false)
@@ -191,4 +193,44 @@ function shared._DEK:Load(Operator:Player,Inventor:number,Slot:number) -- Operat
 		
 	end
 	
+end
+
+function shared._DEK:Steal(Operator:Player,OperatorSlot:number,Victim:number,VictimSlot:number) -- fix 4 kohles (allow 0)
+	
+	if not (Operator or Victim) then
+		return
+	end
+	
+	local RemoteParts = shared._DEK:GetStore(Victim,VictimSlot)
+	if RemoteParts then
+		local StolenParts = shared._DEK:LoadParts(RemoteParts,false)
+		
+		shared._DEK:SaveParts(StolenParts,Operator.UserId,OperatorSlot)
+		
+	end
+	
+end
+
+function shared._DEK:Delete(Inventor:number,Slot:number)
+	-- DO NOT USE THIS FUNCTION
+	local Success,Error = pcall(function()
+		
+		if Slot then -- Person299
+			
+			local Store = DStore:GetDataStore(DStoreP299..Slot)
+			Store:RemoveAsync(Inventor)
+		
+		else -- Kohls
+		
+			DStoreKohls:RemoveAsync(Inventor)
+			
+		end
+		
+	end)
+	
+	if Success then
+		print("Successfully removed build from "..Inventor)
+	else
+		warn("Failed to remove build from "..Inventor)
+	end
 end
