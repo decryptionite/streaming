@@ -1,6 +1,7 @@
 --!nonstrict
 --Dekryptionite 01/22/2025
 --Dekryptionite 02/20/2025 You can now save builds
+--Dekryptionite 02/21/2025 cleaned some shit up; didnt test in game prob doesnt even work lol
 
 -- Do not overwrite people's builds unless they are making the game unplayable or violating ROBLOX rules in a way that will lead to BoasGameTest being terminated
 
@@ -14,15 +15,12 @@ end
 
 shared._DEK = {}
 
-shared._DEK.ClientIndicator = true -- for cxo's implementation
-
 -- Datastores
 local DStore = game:GetService("DataStoreService")
 local DStoreKohls = DStore:GetDataStore("BuildSaveSystem")
 local DStoreP299 = "Person299BuildSaveSystem"
 
 -- Grab commands from Solinium (used for clientscript)
---local Solinium = require(game.ServerScriptService.goog.Utilities.Commands)
 local Solinium = game.ServerScriptService.goog
 
 function shared._DEK:ClientCode(Player:Player,Code:string)
@@ -51,14 +49,13 @@ function shared._DEK:GetStore(Inventor:number,Slot:number)
 	
 end
 
-function shared._DEK:LoadParts(Parts)
+function shared._DEK:LoadParts(Parts:{},Client:boolean) 
 	
 	if not Parts then
 		return
 	end
 	
-	local PartsParent = Instance.new("Folder")
-	PartsParent.Name = "TempBuilds"
+	local PartsParent = {}
 	
 	for i,v in Parts do
 	
@@ -82,12 +79,12 @@ function shared._DEK:LoadParts(Parts)
 		Placed.Anchored = v.Anchored
 		Placed.CanCollide = v.CanCollide
 		--
-		if shared._DEK.ClientIndicator then
+		if Client then
 			Placed.Transparency = 0.6
 			Placed.CastShadow = false
 		end
 		--
-		Placed.Parent = PartsParent
+		table.insert(PartsParent, Placed)
 		
 	end
 	return PartsParent
@@ -146,22 +143,52 @@ function shared._DEK:SaveParts(Parts:{},User:number,Slot:number)
 	
 end
 
+local function BundleIt(Parts:{},Class:string,Name:string)
+
+	local PartsParent = Instance.new(Class)
+	PartsParent.Name = Name
+	
+	for i,v in Parts do
+		v.Parent = PartsParent
+	end
+	
+	return PartsParent
+	
+end
+
 function shared._DEK:Load(Operator:Player,Inventor:number,Slot:number) -- Operator of command, Inventor/Owner of the build, Inventor's build save slot
 
 	if not (Operator or Inventor) then -- to lazy to make this shit actually useful info on the user end
 		return
 	end
-
-	local Parts = shared._DEK:GetStore(Inventor,Slot)
 	
-	if Parts then
+	local RemoteParts = shared._DEK:GetStore(Inventor,Slot)
 	
-		local PartsFolder = shared._DEK:LoadParts(Parts)
+	if RemoteParts then
+	
+		-- Place the parts on the server
+		if Operator == game.Workspace then
+			local Parts = shared._DEK:LoadParts(RemoteParts,false)
+			
+			for i,v in Parts do
+				table.insert(_G.btoolsparts, v)
+				v.Parent = game.Workspace
+			end
+			
+			return
+		end
 		
-		PartsFolder.Parent = Operator.PlayerGui
+		-- Place the parts on Operator's client
+		if Operator:IsA("Player") then
+			local Parts = shared._DEK:LoadParts(RemoteParts,true)
+			local PartsFolder = BundleIt(Parts,"Folder","TempBuilds")
 		
-		shared._DEK:ClientCode(Operator,"game.Players.LocalPlayer.PlayerGui:WaitForChild(\"TempBuilds\").Parent = game.Workspace")
-	
+			PartsFolder.Parent = Operator.PlayerGui
+		
+			shared._DEK:ClientCode(Operator,"game.Players.LocalPlayer.PlayerGui:WaitForChild(\"TempBuilds\").Parent = game.Workspace")
+			
+		end
+		
 	end
 	
 end
