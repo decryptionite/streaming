@@ -1,18 +1,24 @@
 --!nonstrict
---Dekryptionite 01/22/2025
---Dekryptionite 02/20/2025 You can now save builds
---Dekryptionite 02/21/2025 cleaned some shit up; didnt test in game prob doesnt even work lol
+--[[
 
--- To-do: Incase of larger builds add a dynamic wait() and have it be cancellable
--- will clean up shit l8r, works pretty good 4 now
+/*
 
--- Do not overwrite people's builds unless they are making the game unplayable or violating ROBLOX rules in a way that will lead to BoasGameTest being terminated
+	* unlocked_buildload.lua
+	* Dekryptionite
+	* 01/22/2025
+	
+*/
+
+	The only valid reasons to clear a build from the database is either chain-crashing or a build that can lead to the game being terminated
+	All useful functions are global and can be used in your require() script
+]]
 
 if shared._DEK then
 	print("Dekryptionite: Someone has already loaded the script! Use shared._DEK:Load()\n")
 	return
 end
 if not game:GetService("RunService"):IsServer() then
+	print("Dekryptionite: This script will not work on a client environment!\n")
 	return
 end
 
