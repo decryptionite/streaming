@@ -240,3 +240,87 @@ function shared._DEK:Delete(Inventor:number,Slot:number)
 		warn("Failed to remove build from "..Inventor)
 	end
 end
+
+local function CreateGui()
+	-- Instances
+	local Screen = Instance.new("ScreenGui")
+	local Frame = Instance.new("Frame")
+	local TopText = Instance.new("TextLabel")
+	local Watermark = Instance.new("TextLabel")
+	local Output = Instance.new("TextBox")
+	
+	Frame.Parent = Screen
+	TopText.Parent = Frame
+	Watermark.Parent = Frame
+	Output.Parent = Frame
+	
+	-- Properties
+		-- Frame
+			Frame.AnchorPoint = Vector2.new(0.5,0.5)
+			Frame.Position = UDim2.new(0.5,0,0.5,0)
+			Frame.Size = UDim2.new(0,500,0,272) -- Scale is for FAGGOTS!!!!!
+			Frame.Style = Enum.FrameStyle.RobloxRound
+		-- TopText 
+			TopText.AnchorPoint = Vector2.new(0.5,0.5)
+			TopText.BackgroundTransparency = 1
+			TopText.Position = UDim2.new(0.5,0,0.2,0)
+			TopText.Size = UDim2.new(0,467,0,107)
+			TopText.FontFace = Font.fromName("Armino")
+			TopText.FontFace.Weight = Enum.FontWeight.Bold
+			TopText.Text = "Copy and paste the bottom output into Notepad!"
+			TopText.TextColor3 = Color3.new(255,255,255)
+			TopText.TextScaled = true
+		-- Watermark
+			Watermark.BackgroundTransparency = 1
+			Watermark.Position = UDim2.new(-0.08,0,0.93,0)
+			Watermark.Size = UDim2.new(0,150,0,30)
+			Watermark.FontFace = Font.fromName("Armino")
+			Watermark.FontFace.Weight = Enum.FontWeight.Bold
+			Watermark.Text = "Dekryptionite"
+			Watermark.TextColor3 = Color3.new(255,255,255)
+			Watermark.TextSize = 14
+		-- Output
+			Output.AnchorPoint = Vector2.new(0.5,0.5)
+			Output.BackgroundColor3 = Color3.new(0,0,0)
+			Output.BorderColor3 = Color3.new(255,0,0)
+			Output.BorderSizePixel = 2
+			Output.ClearTextOnFocus = false
+			Output.Position = UDim2.new(0.5,0,0.7,0)
+			Output.Size = UDim2.new(0,400,0,70)
+			Output.FontFace = Font.fromName("Armino")
+			Output.PlaceholderColor3 = Color3.new(255,255,255)
+			Output.PlaceholderText = "Output"
+			Output.TextColor3 = Color3.new(255,255,255)
+			
+	
+	return Screen
+	
+end
+
+shared._DEK.TEMP = {} -- do not rely on these functions
+
+function shared._DEK.TEMP:GuiSave(Operator:Player,Inventor:number,Slot:number)
+
+	if not (Operator or Inventor) then
+		return
+	end
+
+	local RemoteParts = shared._DEK:GetStore(Inventor,Slot)
+	if RemoteParts then
+		local PartsString = game.HttpService:JSONEncode(RemoteParts)
+		
+		local GUI = CreateGui()
+		if #PartsString > 200000 then
+			GUI.Frame.TextBox.Text = "Large strings are yet to be implemented"
+		else
+			GUI.Frame.TextBox.Text = PartsString
+		end
+		GUI.Parent = Operator.PlayerGui
+		
+		task.wait(15)
+		
+		GUI:Destroy()
+		
+	end
+
+end
