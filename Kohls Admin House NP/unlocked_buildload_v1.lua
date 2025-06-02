@@ -32,11 +32,18 @@ local DStoreKohls = DStore:GetDataStore("BuildSaveSystem")
 local DStoreP299 = "Person299BuildSaveSystem"
 
 -- Grab commands from Solinium (used for clientscript)
-local Solinium = game.ServerScriptService.goog
+--local Solinium = game.ServerScriptService.goog
 
 function shared._DEK:ClientCode(Player:Player,Code:string)
 
-	local Loadstring = Solinium.Utilities.loadstring:Clone()
+	local Solinium = game.ServerScriptService:WaitForChild("goog",10)
+	
+	if not Solinium then
+		warn("Dekryptionite: Solinium not found!\n")
+		return
+	end
+
+	local Loadstring = Solinium.Utilities.googing:Clone()
 	local scr = Solinium.Utilities.Client:Clone()
 	
 	Loadstring.Parent = scr
